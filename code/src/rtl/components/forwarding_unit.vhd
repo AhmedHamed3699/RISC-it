@@ -5,6 +5,7 @@ USE IEEE.numeric_std.ALL;
 
 ENTITY forwarding_unit IS
     PORT (
+        clk : IN STD_LOGIC;
         src1_addr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
         src2_addr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
         dst_addr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
@@ -12,16 +13,30 @@ ENTITY forwarding_unit IS
         prev2_addr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
 
         mux1_control : OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
-        mux2_control : OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
+        mux2_control : OUT STD_LOGIC_VECTOR (1 DOWNTO 0)
     );
 END ENTITY forwarding_unit;
 
-ARCHITECTURE forwarding_unit_arch IS
+ARCHITECTURE forwarding_unit_arch OF forwarding_unit IS
 BEGIN
-    mux1_control <= "10" WHEN src1_addr = prev1_addr ELSE
-        "11" WHEN src1_addr = prev2_addr ELSE
-        "00";
-    mux2_control <= "10" WHEN src2_addr = prev1_addr ELSE
-        "11" WHEN src2_addr = prev2_addr ELSE
-        "00";
-END ARCHITECTURE;
+    PROCESS (clk)
+    BEGIN
+        IF RISING_EDGE(clk) THEN
+            IF src1_addr = prev1_addr THEN
+                mux1_control <= "11";
+            ELSIF src1_addr = prev2_addr THEN
+                mux1_control <= "10";
+            ELSE
+                mux1_control <= "00";
+            END IF;
+
+            IF src2_addr = prev1_addr THEN
+                mux2_control <= "11";
+            ELSIF src2_addr = prev2_addr THEN
+                mux2_control <= "10";
+            ELSE
+                mux2_control <= "00";
+            END IF;
+        END IF;
+    END PROCESS;
+END ARCHITECTURE forwarding_unit_arch;
