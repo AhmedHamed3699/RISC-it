@@ -79,5 +79,31 @@ def assemble(instruction):
         return assemble_two_operand(instruction)
     return assemble_three_operand(instruction)
 
+def read_line(line,index):
+    if(line[0] == ";" or line[0] == "\n" or line[0] == "#"): #ignore comments
+        return [None,-1]
+    if(line[0] == "."): #handle .ORG 
+        return [line.split(" ")[0],line.split(" ")[1]] #return the address to jump to
+    return [line.split(" ")[0],index] #return the instruction and the index
+
 def main():
-    pass
+
+    file = open("ISA.txt","r")
+    ram, index = ["" for i in range(4096)], 0
+    lines = file.readlines()
+    # read the file and assemble the instructions
+    for line in lines:
+        instruction = read_line(line)
+        if(instruction[0] == None):
+            continue
+        if(instruction[0] == ".ORG"):
+            index = instruction[1]
+            continue
+        ram[index] = assemble(instruction[0])
+        index += 1
+    file.close()
+    # write the RAM to a file
+    file = open("RAM.txt","w")
+    for i in range(4096):
+        file.write(ram[i] + "\n")
+    file.close()
