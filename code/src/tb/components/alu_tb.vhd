@@ -9,7 +9,6 @@ ARCHITECTURE behavior OF tb_alu IS
 
     COMPONENT alu
         PORT(
-            clk          : IN STD_LOGIC;
             flag_restore : IN STD_LOGIC;
             flags_reg    : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
             a, b         : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -32,7 +31,6 @@ ARCHITECTURE behavior OF tb_alu IS
 BEGIN
 
     uut: alu PORT MAP (
-        clk            => clk,
         flag_restore   => flag_restore,
         flags_reg      => flags_reg,
         a              => a,
