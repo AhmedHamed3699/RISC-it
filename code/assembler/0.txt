@@ -1,0 +1,2 @@
+nop
+inc r1, r2
