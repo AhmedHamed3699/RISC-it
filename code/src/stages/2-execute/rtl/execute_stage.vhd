@@ -1,7 +1,11 @@
+LIBRARY IEEE;
+USE IEEE.std_logic_1164.ALL;
+USE IEEE.numeric_std.ALL;
+
 ENTITY execute_stage IS
   PORT (
     -- Inputs
-    clk : IN STD_LOGIC
+    clk : IN STD_LOGIC;
     src1_addr, src2_addr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
     prev1_addr, prev2_addr : IN STD_LOGIC_VECTOR (2 DOWNTO 0);
     Rsrc1, Rsrc2 : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
@@ -9,10 +13,7 @@ ENTITY execute_stage IS
     alu_forwarded_Rsrc1, alu_forwarded_Rsrc2 : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
     Imm : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
     flags_in : IN STD_LOGIC_VECTOR (3 DOWNTO 0);
-
-    -- Ports
     in_port : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
-    out_port : OUT STD_LOGIC_VECTOR (15 DOWNTO 0);
 
     -- Control signals
     flag_restore : IN STD_LOGIC;
@@ -27,6 +28,7 @@ ENTITY execute_stage IS
     mem_write : IN STD_LOGIC;
 
     -- Outputs
+    out_port : OUT STD_LOGIC_VECTOR (15 DOWNTO 0);
     will_jmp : OUT STD_LOGIC;
     mem_excep : OUT STD_LOGIC;
     flags_out : OUT STD_LOGIC_VECTOR (3 DOWNTO 0);
@@ -94,32 +96,34 @@ ARCHITECTURE execute_stage_arch OF execute_stage IS
   SIGNAL alu_in2_mux_in : STD_LOGIC_VECTOR (15 DOWNTO 0) := (OTHERS => '0');
   SIGNAL alu_in1_mux_out : STD_LOGIC_VECTOR (15 DOWNTO 0) := (OTHERS => '0');
   SIGNAL alu_in2_mux_out : STD_LOGIC_VECTOR (15 DOWNTO 0) := (OTHERS => '0');
-  SIGNAL alu_in1_mux_sel : STD_LOGIC := '0';
-  SIGNAL alu_in2_mux_sel : STD_LOGIC := '0';
+  SIGNAL alu_in1_mux_sel : STD_LOGIC_VECTOR (1 DOWNTO 0) := (OTHERS => '0');
+  SIGNAL alu_in2_mux_sel : STD_LOGIC_VECTOR (1 DOWNTO 0) := (OTHERS => '0');
   SIGNAL alu_result : STD_LOGIC_VECTOR (15 DOWNTO 0) := (OTHERS => '0');
 
+  SIGNAL flags_out_sig : STD_LOGIC_VECTOR (3 DOWNTO 0) := (OTHERS => '0');
   SIGNAL branch_choice : STD_LOGIC := '0';
 
 BEGIN
 
   -- Components
-  alu_inst : alu PORT MAP(flag_restore, flags_in, alu_in1_mux_out, alu_in2_mux_out, alu_operation, flags_out, alu_result);
-  f_unit_inst : forwarding_unit PORT MAP(clk, src1_addr, src2_addr, prev1_addr, prev2_addr, alu_in1_mux_sel, alu_in1_mux_sel);
+  alu_inst : alu PORT MAP(flag_restore, flags_in, alu_in1_mux_out, alu_in2_mux_out, alu_operation, flags_out_sig, alu_result);
+  f_unit_inst : forwarding_unit PORT MAP(clk, src1_addr, src2_addr, prev1_addr, prev2_addr, alu_in1_mux_sel, alu_in2_mux_sel);
 
   -- Muxes
   op1_mux : mux2to1_16bit PORT MAP(Rsrc1, Rsrc2, store_op, alu_in1_mux_in);
   op2_mux : mux2to1_16bit PORT MAP(Rsrc2, Imm, has_immidiate, alu_in2_mux_in);
   alu_in1_mux : mux4to1_16bit PORT MAP(alu_in1_mux_in, alu_in1_mux_in, mem_forwarded_Rsrc1, alu_forwarded_Rsrc1, alu_in1_mux_sel, alu_in1_mux_out);
   alu_in2_mux : mux4to1_16bit PORT MAP(alu_in2_mux_in, alu_in2_mux_in, mem_forwarded_Rsrc2, alu_forwarded_Rsrc2, alu_in2_mux_sel, alu_in2_mux_out);
-  alu_result_mux : mux2to1_16bit PORT MAP(in_port, alu_result, input_enable, res);
-  jmp_mux : mux4 PORT MAP('1', flags_out(1), flags_out(2), flags_out(3), jmp_type, branch_choice);
+  alu_result_mux : mux2to1_16bit PORT MAP(alu_result, in_port, input_enable, res);
+  jmp_mux : mux4 PORT MAP('1', flags_out_sig(1), flags_out_sig(2), flags_out_sig(3), jmp_type, branch_choice);
 
   -- other compinational logic
-  will_jmp <= branch = '1' AND branch_choice = '1';
+  flags_out <= flags_out_sig;
+  will_jmp <= branch AND branch_choice;
   mem_excep <= '1' WHEN (alu_result > x"0FFF")
     AND (mem_read = '1' OR mem_write = '1') ELSE
     '0';
   out_port <= Rsrc1 WHEN output_enable = '1' ELSE
-    'Z';
+    (OTHERS => 'Z');
 
 END execute_stage_arch;
