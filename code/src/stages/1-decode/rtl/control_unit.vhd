@@ -24,9 +24,9 @@ ENTITY control_unit IS
     );
 END control_unit;
 ARCHITECTURE behavioral OF control_unit IS
+	signal control_signals : STD_LOGIC_VECTOR(19 DOWNTO 0);
 BEGIN
     PROCESS (clk)
-    signal control_signals : STD_LOGIC_VECTOR(19 DOWNTO 0);
     BEGIN
         IF rising_edge(clk) THEN
             CASE opcode IS

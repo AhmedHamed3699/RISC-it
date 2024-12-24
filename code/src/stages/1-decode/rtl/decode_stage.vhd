@@ -37,15 +37,18 @@ end decode_stage;
 
 architecture decode_stage_arch of decode_stage is
 
-  component hazard_detection_unit is
-    port(
-      IF_ID_Rsrc1, IF_ID_Rsrc2 : in std_logic_vector(2 downto 0);
-      ID_EX_Rdst              : in std_logic_vector(2 downto 0);
-      ID_EX_mem_read          : in std_logic;
-      ret, rti                : in std_logic;
-      ID_EX_branch, EX_MEM_branch : in std_logic;
-      hazard, stall, will_branch : out std_logic
-    );
+  component hazard_detection_unit IS PORT(
+    IF_ID_Rsrc1,IF_ID_Rsrc2 : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+    ID_EX_Rdst              : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+    ID_EX_mem_read          : IN  STD_LOGIC;
+    ret                     : IN  STD_LOGIC;
+    rti                     : IN  STD_LOGIC;
+    ID_EX_branch            : IN  STD_LOGIC;
+    EX_MEM_branch            : IN  STD_LOGIC;
+    hazard                  : OUT STD_LOGIC;
+    stall                   : OUT STD_LOGIC;
+    will_branch             : OUT STD_LOGIC
+  );
   end component;
 
   component control_unit is
