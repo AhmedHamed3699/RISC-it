@@ -9,11 +9,12 @@ ENTITY instruction_memory IS
     PORT (
         clk : IN STD_LOGIC;
         address : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-        inst : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-        empty_stack : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-        invalid_mem_add : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-        INT0 : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-        INT2 : OUT STD_LOGIC_VECTOR(15 DOWNTO 0)
+        inst : OUT STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
+        first_inst : OUT STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
+        empty_stack : OUT STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
+        invalid_mem_add : OUT STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
+        INT0 : OUT STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
+        INT2 : OUT STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0')
     );
 END ENTITY instruction_memory;
 
@@ -34,25 +35,23 @@ ARCHITECTURE instruction_memory_arch OF instruction_memory IS
             READ(text_line, bv);
             ram_content(i) := TO_STDLOGICVECTOR(bv);
             i := i + 1;
-        END LOOP;
+        END LOOP
         RETURN ram_content;
-    END FUNCTION;
+    END FUNCTION
     SIGNAL ram : ram_type := init_ram_from_file;
 BEGIN
 
-    PROCESS (clk)
+    PROCESS (address)
     BEGIN
-        IF RISING_EDGE(clk) THEN
-            IF (TO_INTEGER(UNSIGNED(address)) < mem_depth) THEN
-                inst <= ram(TO_INTEGER(UNSIGNED(address)));
-            ELSE
-                inst <= (OTHERS => '0');
-            END IF;
+        IF (TO_INTEGER(UNSIGNED(address)) < mem_depth) THEN
+            inst <= ram(TO_INTEGER(UNSIGNED(address)));
+        ELSE
+            inst <= (OTHERS => '0');
         END IF;
     END PROCESS;
-
-    empty_stack <= ram(0);
-    invalid_mem_add <= ram(1);
-    INT0 <= ram(2);
-    INT2 <= ram(3);
+    first_inst <= ram(0);
+    empty_stack <= ram(1);
+    invalid_mem_add <= ram(2);
+    INT0 <= ram(3);
+    INT2 <= ram(4);
 END ARCHITECTURE;

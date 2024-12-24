@@ -8,7 +8,7 @@ ENTITY pc_reg IS
     PORT (
         pc_in : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
         clk, hlt, rst, one_cycle : IN STD_LOGIC;
-        next_ins_address : OUT STD_LOGIC_VECTOR (15 DOWNTO 0)
+        next_ins_address : OUT STD_LOGIC_VECTOR (15 DOWNTO 0) := (OTHERS => '0')
     );
 END ENTITY pc_reg;
 
@@ -20,7 +20,7 @@ BEGIN
         IF (RISING_EDGE(clk)) THEN
             IF (rst = '1') THEN
                 stop_till_rst <= '0';
-                next_ins_address <= (OTHERS => '0');
+                next_ins_address <= pc_in;
             ELSIF (stop_till_rst = '0') THEN
                 IF (one_cycle = '0' AND hlt = '0') THEN
                     next_ins_address <= pc_in;
