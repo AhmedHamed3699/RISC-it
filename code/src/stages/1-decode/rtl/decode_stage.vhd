@@ -7,7 +7,8 @@ entity decode_stage is
     clk           : in std_logic;
     reset         : in std_logic;
     inst          : in std_logic_vector(15 downto 0);
-    rti           : in std_logic;
+    MEM_WB_rti    : in std_logic;
+    ID_EX_rti     : in std_logic;
     ret           : in std_logic;
     write_reg     : in std_logic;
     has_immediate : in std_logic;
@@ -140,7 +141,7 @@ begin
       ID_EX_Rdst => ID_EX_Rdst,
       ID_EX_mem_read => ID_EX_mem_read,
       ret => ret,
-      rti => rti,
+      rti => MEM_WB_rti,
       ID_EX_branch => ID_EX_branch,
       EX_MEM_branch => EX_MEM_branch,
       hazard => hazard_signal,
@@ -148,7 +149,7 @@ begin
       will_branch => will_branch
     );
 
-  JMP_dst_Mux_selector <= ret or rti;
+  JMP_dst_Mux_selector <= ret or MEM_WB_rti;
 
   JMP_dst_mux: mux2to1_16bit
     port map (
@@ -158,7 +159,7 @@ begin
       y => jmp_add
     );
 
-  NOP_mux_selector <= rti or has_immediate;
+  NOP_mux_selector <= ID_EX_rti or has_immediate;
 
   NOP_inst_mux: mux2to1_16bit
     port map (
