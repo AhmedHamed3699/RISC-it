@@ -1,0 +1,6 @@
+LDM R1, 100
+PUSH R1
+# This a commented line
+IADD R0,R1, 4CA
+LDD R1, 100(R5)
+STD R1, 100(R5)
