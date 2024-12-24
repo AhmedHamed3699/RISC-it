@@ -11,7 +11,7 @@ ENTITY control_unit IS
         mem_write : OUT STD_LOGIC;
         mem_read : OUT STD_LOGIC;
         mem_to_reg : OUT STD_LOGIC;
-        alu_operation : OUT STD_LOGIC_VECTOR(2 DOWNTO 0)
+        alu_operation : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
         is_immediate: OUT STD_LOGIC;
         stack_operation: OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
         branch : OUT STD_LOGIC;
